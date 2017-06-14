@@ -53,16 +53,17 @@ int sleepTimeS = 600;
 void setup() {
   // zasilanie przetwornika temperatury ds18b20
   pinMode(16, OUTPUT);
-  pinMode(12, OUTPUT);
+  pinMode(2, OUTPUT);
   pinMode(5,OUTPUT);
   digitalWrite(16, HIGH);
-  digitalWrite(12, LOW);
+  digitalWrite(2, LOW);
   
   Serial.begin(115200);
  
   wifiConnect();
     
-  float temp;
+  float temp,analogV;
+  int analog;
   
   do {
     DS18B20.requestTemperatures(); 
@@ -71,8 +72,14 @@ void setup() {
     Serial.println("");
     Serial.print("Temperature: ");
     Serial.println(temp);
-    sendTemperature(temp);
-
+    analog=analogRead(A0);
+    Serial.print("Analog: ");
+    Serial.println(analog);
+    analogV=0.01075*((float)analog);
+    Serial.print("Analog [V]: ");
+    Serial.println(analogV);
+    sendResults(temp,analogV);
+    
       // Sleep
       Serial.println("a");
   Serial.println("ESP8266 in sleep mode");
@@ -103,7 +110,7 @@ void wifiConnect()
   Serial.println("WiFi connected");  
 }
 
-void sendTemperature(float temperature)
+void sendResults(float temperature,float supplayVoltage)
 {  
    WiFiClient client;
    
@@ -131,6 +138,8 @@ void sendTemperature(float temperature)
 */
  String body = "field1=";
            body += String(temperature);
+           body += String("&field2=");
+           body += String(supplayVoltage);
 
     client.print("POST /update HTTP/1.1\n");
     client.print("Host: api.thingspeak.com\n");
