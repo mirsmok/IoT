@@ -36,7 +36,7 @@
 //const char* privateKey = "2mzAoN5W2dhM9Ra9NR6a";
 
 //thinkspeak.com settings
-const char* host = "api.thingspeak.com";
+const char* host = "192.168.1.6";
 //const int channelID = XXX;
 String writeAPIKey = "HPGNR50XGF9V9KAD"; // write API key for your ThingSpeak Channel
 
@@ -50,7 +50,7 @@ DallasTemperature DS18B20(&oneWire);
 char unameenc[USER_PWD_LEN];
 float oldTemp;
 // Time to sleep (in seconds):
-int sleepTimeS = 600;
+int sleepTimeS = 300;
 
 void setup() {
   // zasilanie przetwornika temperatury ds18b20
@@ -138,7 +138,7 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
 {  
    WiFiClient client;
    
-   while(!client.connect(host, 80)) {
+   while(!client.connect(host, 1500)) {
     Serial.println("connection failed");
     wifiConnect(); 
   }
@@ -160,6 +160,7 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
 */
+/* thinkSpea
  String body = "field1=";
            body += String(temperature);
            body += String("&field2=");
@@ -179,7 +180,13 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
     client.print("\n\n");
     
     Serial.println(body);
-    
+    */
+    String dataToSend = "<content><sensorTemperature>";
+    dataToSend+=String(temperature);
+    dataToSend+="</sensorTemperature><supplayVoltage>";
+    dataToSend+=String(supplayVoltage);
+    dataToSend+="</supplayVoltage><id>54321</id></content>";
+    client.println(dataToSend);
   delay(500);
   while(client.available()){
     String line = client.readStringUntil('\r');
