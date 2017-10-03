@@ -50,9 +50,10 @@ DallasTemperature DS18B20(&oneWire);
 char unameenc[USER_PWD_LEN];
 float oldTemp;
 // Time to sleep (in seconds):
-int sleepTimeS = 300;
+int sleepTimeS;
 
 void setup() {
+  sleepTimeS=10;
   // zasilanie przetwornika temperatury ds18b20
   pinMode(16, OUTPUT);
   pinMode(2, OUTPUT);
@@ -126,7 +127,7 @@ void wifiConnect()
       connectAttemps++;
       if(connectAttemps > 10){
         Serial.println("Can't connect to Wifi go to Sleep for 20 minuts...");
-        sleepTimeS=1200;
+        sleepTimeS=10;
         ESP.deepSleep(sleepTimeS * 1000000);
         }
     }  
@@ -181,11 +182,11 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
     
     Serial.println(body);
     */
-    String dataToSend = "<content><sensorTemperature>";
-    dataToSend+=String(temperature);
-    dataToSend+="</sensorTemperature><supplayVoltage>";
-    dataToSend+=String(supplayVoltage);
-    dataToSend+="</supplayVoltage><id>54321</id></content>";
+    String dataToSend = "<content><RSSI>"+String(WiFi.RSSI())+"</RSSI>";
+    dataToSend+="<dev_type>temperatureSensor</dev_type>";
+    dataToSend+="<supplayVoltage>"+String(supplayVoltage)+"</supplayVoltage>";
+    dataToSend+="<sensorTemperature>"+String(temperature)+"</sensorTemperature>";
+    dataToSend+="<id>2001</id></content>";
     client.println(dataToSend);
   delay(500);
   while(client.available()){

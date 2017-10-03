@@ -24,6 +24,7 @@
 #define RGB_GREEN 12
 #define RGB_RED 15
 #define ONE_WIRE_BUS 14  // DS18B20 pin
+#define OUTPUT_PIN 2
 
 //makros for rgb led 
 #define RGB_OFF digitalWrite(RGB_RED,LOW);digitalWrite(RGB_GREEN,LOW);digitalWrite(RGB_BLUE,LOW)
@@ -56,6 +57,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 WiFiClient client;
 int counter;
+bool outputState;
 
 //functions prototypes
 bool wifiConnect(void);
@@ -130,6 +132,9 @@ void setup() {
   pinMode(RGB_GREEN,OUTPUT);
   pinMode(RGB_BLUE,OUTPUT);
   digitalWrite(RGB_RED,HIGH);
+  pinMode(OUTPUT_PIN,OUTPUT);
+  digitalWrite(OUTPUT_PIN,HIGH);
+  outputState=false;
 }
 
 void loop() {
@@ -146,20 +151,23 @@ void loop() {
     while(client.available()){
       String line = client.readStringUntil('\r');
       Serial.print(line);
-      String value=findTag(line,"status");
+      String value=findTag(line,"outputState");
       if(value!="" ){
         if (value.equals("ON")){
           RGB_OFF;
           RGB_ON_BLUE;
+          outputState=true;
         }
         if (value.equals("OFF")){
           RGB_OFF;
+          outputState=false;
         }
       }
     }
+    digitalWrite(OUTPUT_PIN,outputState);
     delay(100);
     counter+=1;
-    if(counter > 100){
+    if(counter > 30){
        sendStatus();
        counter=0;
     }
@@ -167,9 +175,10 @@ void loop() {
 }  
 
 void sendStatus(void){
-   String dataToSend = "<content><RSSI>";
-    dataToSend+=String(WiFi.RSSI());
-    dataToSend+="</RSSI><dev_type>outputModule</dev_type><id>54321</id></content>";
+    String dataToSend="<content><RSSI>"+String(WiFi.RSSI())+"</RSSI>";
+    dataToSend+="<dev_type>outputModule</dev_type>";
+    dataToSend+="<id>1001</id>";
+    dataToSend+=String("<outputState>")+ String(outputState ? "ON" : "OFF")+ String("</outputState></content>");
     Serial.println(dataToSend);
     client.println(dataToSend);
 }
@@ -281,11 +290,10 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
     
     Serial.println(body);
     */
-    String dataToSend = "<content><sensorTemperature>";
-    dataToSend+=String(temperature);
-    dataToSend+="</sensorTemperature><supplayVoltage>";
-    dataToSend+=String(supplayVoltage);
-    dataToSend+="</supplayVoltage><id>54321</id></content>";
+    String dataToSend = "<content><sensorTemperature>"+String(temperature)+"</sensorTemperature>";
+    dataToSend+="<supplayVoltage>"+String(supplayVoltage)+"</supplayVoltage>";
+    dataToSend+="<RSSI>"+String(WiFi.RSSI())+"</RSSI>";
+    dataToSend+="<id>1001</id></content>";
     Serial.println(dataToSend);
     client.println(dataToSend);
   delay(500);
