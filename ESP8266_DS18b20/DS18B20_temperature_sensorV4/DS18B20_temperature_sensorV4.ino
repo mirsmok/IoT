@@ -36,7 +36,7 @@
 //const char* privateKey = "2mzAoN5W2dhM9Ra9NR6a";
 
 //thinkspeak.com settings
-const char* host = "192.168.1.6";
+const char* host = "192.168.1.201";
 //const int channelID = XXX;
 String writeAPIKey = "HPGNR50XGF9V9KAD"; // write API key for your ThingSpeak Channel
 
@@ -53,7 +53,7 @@ float oldTemp;
 int sleepTimeS;
 
 void setup() {
-  sleepTimeS=10;
+  sleepTimeS=600;
   // zasilanie przetwornika temperatury ds18b20
   pinMode(16, OUTPUT);
   pinMode(2, OUTPUT);
@@ -127,7 +127,7 @@ void wifiConnect()
       connectAttemps++;
       if(connectAttemps > 10){
         Serial.println("Can't connect to Wifi go to Sleep for 20 minuts...");
-        sleepTimeS=10;
+        sleepTimeS=1200;
         ESP.deepSleep(sleepTimeS * 1000000);
         }
     }  
@@ -188,7 +188,7 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
     dataToSend+="<sensorTemperature>"+String(temperature)+"</sensorTemperature>";
     dataToSend+="<id>2001</id></content>";
     client.println(dataToSend);
-  delay(500);
+  delay(100);
   while(client.available()){
     String line = client.readStringUntil('\r');
     Serial.print(line);

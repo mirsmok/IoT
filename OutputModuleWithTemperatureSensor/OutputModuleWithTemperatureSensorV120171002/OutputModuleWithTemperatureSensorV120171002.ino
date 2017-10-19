@@ -51,7 +51,7 @@
 //String writeAPIKey = "HPGNR50XGF9V9KAD"; // write API key for your ThingSpeak Channel
 
 //android server
-const char* host = "192.168.1.6";
+const char* host = "192.168.1.201";
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
