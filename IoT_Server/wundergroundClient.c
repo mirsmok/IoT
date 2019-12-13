@@ -22,7 +22,7 @@
 
     #define PORT 80    /* the port client will be connecting to */
 
-    #define MAXDATASIZE 1000 /* max number of bytes we can get at once */
+    #define MAXDATASIZE 10000 /* max number of bytes we can get at once */
 
     int main(int argc, char *argv[])
     {
@@ -56,16 +56,27 @@
             perror("connect");
             exit(1);
         }
-	char messageBuf[100];
+	char messageBuf[300];
 	char * message = "GET /channels/227943/field/1/last.json?api_key=372709TAH7GDVVS0 HTTP/1.1\r\nHost: api.thingspeak.com\r\nConnection: keep-alive\r\n\r\n";
 	strcpy(messageBuf,message);
-//	while (1) {
+	char * zapytanie="GET /api/33b6815fdd298d17/conditions/q/50.89,15.81.xml HTTP/1.1\n";
+	strcpy(messageBuf,zapytanie);
+	strcat(messageBuf,"Host: api.wunderground.com\n");
+	strcat(messageBuf,"User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0\n");
+	strcat(messageBuf,"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n");
+	strcat(messageBuf,"Accept-Language: en-US,en;q=0.5\n");
+	strcat(messageBuf,"Accept-Encoding: no \n");//gzip, deflate\n");
+	strcat(messageBuf,"Connection: close\n\n");
+//	strcat(messageBuf,"Upgrade-Insecure-Requests: 1");
+//	strcat(messageBuf,"If-Modified-Since: Mon, 06 Nov 2017 20:10:31 GMT\n");
+//	strcat(messageBuf,"Cache-Control: max-age=0\n\n");
+	while (1) {
 		if (send(sockfd, messageBuf, strlen(messageBuf), 0) == -1){
                       perror("send");
 		      exit (1);
 		}
 		printf("After the send function \n");
-
+		sleep(1);
         	if ((numbytes=recv(sockfd, buf, MAXDATASIZE, 0)) == -1) {
 			printf("nic nie odebrano\r\n");
             		perror("recv");
@@ -78,7 +89,7 @@
         	printf("Received in pid=%d, text=: %s \n",getpid(), buf);
 		sleep(1);
 
-//	}
+	}
 
         close(sockfd);
 

@@ -81,20 +81,30 @@ char aktualnyCzas[100];
 
 #include <TimeLib.h>
 //#include "WifiConfig.h"
+#include "images.h"
 #include <NtpClientLib.h>
 #include <ESP8266WiFi.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 #ifndef WIFI_CONFIG_H
 #define YOUR_WIFI_SSID "NETIASPOT-C61350"
 #define YOUR_WIFI_PASSWD "wiktorpatryk"
 #endif // !WIFI_CONFIG_H
 
+
+#define ONE_WIRE_BUS D3  // DS18B20 pin
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature DS18B20(&oneWire);
+float actualTemperature;
+String setpointTemperature,roomTemperature;
+
 #define ONBOARDLED 2 // Built in LED on ESP-12/ESP-07
 #define OUTPUT_PIN D0
 bool outputState;
 
 WiFiClient client;
-bool clientConnected;
+bool clientConnected,dataExchangeOk;
 const char* host = "192.168.1.201";
 int8_t timeZone = 1;
 
@@ -137,8 +147,13 @@ void drawTime() {
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
     display.drawString(86, 0,  aktualnyCzas);
+    display.drawString(0, 0,"WODA: "+  String(actualTemperature));  
+    display.drawString(75, 51,"AKT: "+  roomTemperature );  
+    display.drawString(0, 51,"SET: "+  setpointTemperature);    
     display.setFont(ArialMT_Plain_16);
     outputState ? display.drawString(28, 25, "Piec ON") : display.drawString(28,25,  "Piec OFF");
+    if(clientConnected && dataExchangeOk)
+            display.drawXbm(62, 1, wifi_width, wifi_height, wifi_bits);
 }
 
 Demo demos[] = {drawTime};//, drawTextFlowDemo, drawTextAlignmentDemo, drawRectDemo, drawCircleDemo, drawProgressBarDemo, drawImageDemo};
@@ -183,11 +198,17 @@ String findTag(String input, String tag){
 
 void checkClientResponse(void){
   static int counter=0;
+  static int noResponseCounter;
+  String value;
   while(client.available()){
       String line = client.readStringUntil('\r');
       Serial.print(line);
-      String value=findTag(line,"outputState");
-      if(value!="" ){
+      if (!findTag(line,"setpointTemperature").equals(""))
+        setpointTemperature=findTag(line,"setpointTemperature");
+      if(!findTag(line,"roomTemperature").equals(""))
+        roomTemperature=findTag(line,"roomTemperature");
+      value=findTag(line,"outputState");
+      if(!value.equals("") ){
         if (value.equals("ON")){
           outputState=true;
         }
@@ -195,13 +216,26 @@ void checkClientResponse(void){
           outputState=false;
         }
       }
+      noResponseCounter=0;
     }
-    digitalWrite(OUTPUT_PIN,outputState);
+    if(actualTemperature<1.0 || actualTemperature>70.0)
+      outputState=false;
+    if(noResponseCounter>2){
+      outputState=false;
+      dataExchangeOk=false;
+      client.flush();
+      client.stop();
+    }
+    else{
+      dataExchangeOk=true;
+    }
     //delay(100);
     counter+=1;
     if(counter > 30){
        sendStatus();
        counter=0;
+       if(noResponseCounter <20)
+          noResponseCounter++;
     }    
 }
 
@@ -209,7 +243,8 @@ void sendStatus(void){
     String dataToSend="<content><RSSI>"+String(WiFi.RSSI())+"</RSSI>";
     dataToSend+="<dev_type>outputModule</dev_type>";
     dataToSend+="<id>1002</id>";
-    dataToSend+=String("<outputState>")+ String(outputState ? "ON" : "OFF")+ String("</outputState></content>");
+    dataToSend+=String("<outputState>")+ String(outputState ? "ON" : "OFF")+ String("</outputState>");
+    dataToSend+=String("<sensorTemperature>")+ String(actualTemperature)+ String("</sensorTemperature></content>");
     Serial.println(dataToSend);
     client.println(dataToSend);
 }
@@ -258,6 +293,7 @@ void loop()
 {
   static int i = 0;
   static int last = 0;
+  static int lastTime = 0;
 
   if (syncEventTriggered) {
     processSyncEvent(ntpEvent);
@@ -277,7 +313,7 @@ void loop()
     timeSinceLastModeSwitch = millis();
   }
   
-  if ((millis() - last) > 100) {
+  if ((millis() - last) > 500) {
     //Serial.println(millis() - last);
     last = millis();
   /*  Serial.print(i); Serial.print(" ");
@@ -297,5 +333,20 @@ void loop()
       clientConnected=false;
     }
   }
+  if(clientConnected && dataExchangeOk)
+    digitalWrite(OUTPUT_PIN,outputState);
+  else{  
+    digitalWrite(OUTPUT_PIN,false);
+    outputState=false;
+  }
+  if ((millis() - lastTime) > 5000) {
+    lastTime=millis();
+    do {
+      DS18B20.requestTemperatures(); 
+      actualTemperature = DS18B20.getTempCByIndex(0);
+    } while ((actualTemperature == 85.0 || actualTemperature == (-127.0)) && ((millis()-lastTime)<3000)); 
+  }
+  
   delay(0);
 }
+

@@ -83,11 +83,20 @@ char aktualnyCzas[100];
 //#include "WifiConfig.h"
 #include <NtpClientLib.h>
 #include <ESP8266WiFi.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 #ifndef WIFI_CONFIG_H
 #define YOUR_WIFI_SSID "NETIASPOT-C61350"
 #define YOUR_WIFI_PASSWD "wiktorpatryk"
 #endif // !WIFI_CONFIG_H
+
+
+#define ONE_WIRE_BUS D3  // DS18B20 pin
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature DS18B20(&oneWire);
+float actualTemperature;
+String setpointTemperature,roomTemperature;
 
 #define ONBOARDLED 2 // Built in LED on ESP-12/ESP-07
 #define OUTPUT_PIN D0
@@ -137,6 +146,9 @@ void drawTime() {
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
     display.drawString(86, 0,  aktualnyCzas);
+    display.drawString(0, 0,"WODA: "+  String(actualTemperature));  
+    display.drawString(75, 51,"AKT: "+  roomTemperature );  
+    display.drawString(0, 51,"SET: "+  setpointTemperature);    
     display.setFont(ArialMT_Plain_16);
     outputState ? display.drawString(28, 25, "Piec ON") : display.drawString(28,25,  "Piec OFF");
 }
@@ -186,8 +198,12 @@ void checkClientResponse(void){
   while(client.available()){
       String line = client.readStringUntil('\r');
       Serial.print(line);
+      if (!findTag(line,"setpointTemperature").equals(""))
+        setpointTemperature=findTag(line,"setpointTemperature");
+      if(!findTag(line,"roomTemperature").equals(""))
+        roomTemperature=findTag(line,"roomTemperature");
       String value=findTag(line,"outputState");
-      if(value!="" ){
+      if(!value.equals("") ){
         if (value.equals("ON")){
           outputState=true;
         }
@@ -196,6 +212,8 @@ void checkClientResponse(void){
         }
       }
     }
+    if(actualTemperature<1.0 || actualTemperature>70.0)
+      outputState=false;
     digitalWrite(OUTPUT_PIN,outputState);
     //delay(100);
     counter+=1;
@@ -209,7 +227,8 @@ void sendStatus(void){
     String dataToSend="<content><RSSI>"+String(WiFi.RSSI())+"</RSSI>";
     dataToSend+="<dev_type>outputModule</dev_type>";
     dataToSend+="<id>1002</id>";
-    dataToSend+=String("<outputState>")+ String(outputState ? "ON" : "OFF")+ String("</outputState></content>");
+    dataToSend+=String("<outputState>")+ String(outputState ? "ON" : "OFF")+ String("</outputState>");
+    dataToSend+=String("<sensorTemperature>")+ String(actualTemperature)+ String("</sensorTemperature></content>");
     Serial.println(dataToSend);
     client.println(dataToSend);
 }
@@ -258,6 +277,7 @@ void loop()
 {
   static int i = 0;
   static int last = 0;
+  static int lastTime = 0;
 
   if (syncEventTriggered) {
     processSyncEvent(ntpEvent);
@@ -277,7 +297,7 @@ void loop()
     timeSinceLastModeSwitch = millis();
   }
   
-  if ((millis() - last) > 100) {
+  if ((millis() - last) > 500) {
     //Serial.println(millis() - last);
     last = millis();
   /*  Serial.print(i); Serial.print(" ");
@@ -297,5 +317,13 @@ void loop()
       clientConnected=false;
     }
   }
+  if ((millis() - lastTime) > 5000) {
+    lastTime=millis();
+    do {
+      DS18B20.requestTemperatures(); 
+      actualTemperature = DS18B20.getTempCByIndex(0);
+    } while (actualTemperature == 85.0 || actualTemperature == (-127.0)); 
+  }
+  
   delay(0);
 }

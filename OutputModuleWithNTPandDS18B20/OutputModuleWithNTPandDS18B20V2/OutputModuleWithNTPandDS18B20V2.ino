@@ -96,7 +96,7 @@ char aktualnyCzas[100];
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 float actualTemperature;
-String setpointTemperature="21.0",roomTemperature="23.0";
+String setpointTemperature,roomTemperature;
 
 #define ONBOARDLED 2 // Built in LED on ESP-12/ESP-07
 #define OUTPUT_PIN D0
@@ -198,12 +198,12 @@ void checkClientResponse(void){
   while(client.available()){
       String line = client.readStringUntil('\r');
       Serial.print(line);
-      if (findTag(line,"setpointTemperature")!="")
+      if (!findTag(line,"setpointTemperature").equals(""))
         setpointTemperature=findTag(line,"setpointTemperature");
-      if(findTag(line,"roomTemperature")!="")
+      if(!findTag(line,"roomTemperature").equals(""))
         roomTemperature=findTag(line,"roomTemperature");
       String value=findTag(line,"outputState");
-      if(value!="" ){
+      if(!value.equals("") ){
         if (value.equals("ON")){
           outputState=true;
         }

@@ -193,7 +193,8 @@ void sendResults(float temperature,float supplayVoltage,long rssi)
     String line = client.readStringUntil('\r');
     Serial.print(line);
   }
-  
+  client.flush();
+  client.stop();
   Serial.println();
   Serial.println("Connection closed");
 }
