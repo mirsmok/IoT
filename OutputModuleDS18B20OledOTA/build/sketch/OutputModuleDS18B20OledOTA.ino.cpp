@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#line 1 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
 /*
 Copyright 2016 German Martin (gmag11@gmail.com). All rights reserved.
 
@@ -129,6 +131,25 @@ const char *host = "192.168.1.27";
 int8_t timeZone = 1;
 
 // Start NTP only after IP network is connected
+#line 132 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void onSTAGotIP(WiFiEventStationModeGotIP ipInfo);
+#line 143 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void onSTADisconnected(WiFiEventStationModeDisconnected event_info);
+#line 196 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+bool connectToServer(void);
+#line 217 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+String findTag(String input, String tag);
+#line 238 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void sendStr(String str);
+#line 245 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void checkClientResponse(void);
+#line 297 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void sendStatus(void);
+#line 313 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void setup();
+#line 374 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+void loop();
+#line 132 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
 void onSTAGotIP(WiFiEventStationModeGotIP ipInfo)
 {
   Serial.printf("Got IP: %s\r\n", ipInfo.ip.toString().c_str());
@@ -453,3 +474,4 @@ void loop()
   delay(0);
   ESP.wdtFeed();
 }
+

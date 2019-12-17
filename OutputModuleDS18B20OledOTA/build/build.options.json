@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "..",
+  "builtInLibrariesFolders": "C:\\Program Files (x86)\\Arduino\\libraries",
+  "customBuildProperties": "build.path=c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\build,build.warn_data_percentage=75,runtime.tools.esptool.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\esptool\\0.4.9,runtime.tools.esptool-0.4.9.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\esptool\\0.4.9,runtime.tools.xtensa-lx106-elf-gcc.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2,runtime.tools.xtensa-lx106-elf-gcc-1.20.0-26-gb404fb9-2.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2,runtime.tools.mkspiffs.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\mkspiffs\\0.1.2,runtime.tools.mkspiffs-0.1.2.path=C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\mkspiffs\\0.1.2",
+  "fqbn": "esp8266:esp8266:generic:CpuFrequency=80,FlashFreq=40,FlashMode=dio,UploadSpeed=115200,FlashSize=512K64,ResetMethod=ck,Debug=Serial,DebugLevel=OTA2____",
+  "hardwareFolders": "C:\\Program Files (x86)\\Arduino\\hardware,C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\mirsmok\\Documents\\Arduino\\libraries",
+  "runtime.ide.version": "10810",
+  "sketchLocation": "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino",
+  "toolsFolders": "C:\\Program Files (x86)\\Arduino\\tools-builder,C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr,C:\\Users\\mirsmok\\AppData\\Local\\Arduino15\\packages"
+}
