@@ -82,19 +82,23 @@ static const uint8_t D8 = 15;
 static const uint8_t RX = 3;
 static const uint8_t TX = 1;
 
+
+
+
+
 // Include the correct display library
 // For a connection via I2C using Wire include
-# 98 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
-# 99 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
-//#include "WifiConfig.h"
-# 101 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
-# 102 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+# 102 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
 # 103 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
-# 104 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+//#include "WifiConfig.h"
 # 105 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
 # 106 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
 # 107 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
-# 116 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+# 108 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+# 109 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+# 110 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+# 111 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino" 2
+# 120 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
 OneWire oneWire(D3 /* DS18B20 pin*/);
 DallasTemperature DS18B20(&oneWire);
 float actualTemperature;
@@ -106,7 +110,7 @@ int noResponseCounter;
 volatile bool outputState;
 
 WiFiClient client;
-bool clientConnected, dataExchangeOk,clientCleared;
+bool clientConnected, dataExchangeOk, clientCleared;
 const char *host = "192.168.1.27";
 int8_t timeZone = 1;
 
@@ -129,7 +133,7 @@ void onSTADisconnected(WiFiEventStationModeDisconnected event_info)
   digitalWrite(2 /* Built in LED on ESP-12/ESP-07*/, 0x1); // Turn off LED
   //NTP.stop(); // NTP sync can be disabled to avoid sync errors
 }
-# 195 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+# 199 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
 //output module functions
 bool connectToServer(void)
 {
@@ -139,7 +143,7 @@ bool connectToServer(void)
     if (client.connect(host, 1500))
     {
       Serial.println("client connected");
-      clientCleared=false;
+      clientCleared = false;
       return true;
     }
     else
@@ -175,7 +179,8 @@ String findTag(String input, String tag)
 
 void sendStr(String str)
 {
-  if (client.connected()){
+  if (client.connected())
+  {
     client.println(str);
   }
 }
@@ -196,8 +201,8 @@ void checkClientResponse(void)
     if (!findTag(line, "roomTemperature").equals(""))
       roomTemperature = findTag(line, "roomTemperature");
     value = findTag(line, "outputState");
-    String str="Otrzymano: ";
-    str+=value;
+    String str = "Otrzymano: ";
+    str += value;
     if (!value.equals(""))
     {
       if (value.equals("ON"))
@@ -213,7 +218,7 @@ void checkClientResponse(void)
   }
   if (noResponseCounter > 2)
   {
-    clientCleared=true;
+    clientCleared = true;
     outputState = false;
     dataExchangeOk = false;
     client.flush();
@@ -235,7 +240,8 @@ void checkClientResponse(void)
 void sendStatus(void)
 {
 
-  if (client.connected()){
+  if (client.connected())
+  {
     String dataToSend = "<content><RSSI>" + String(WiFi.RSSI()) + "</RSSI>";
     dataToSend += "<dev_type>outputModule</dev_type>";
     dataToSend += "<id>1002</id>";
@@ -244,13 +250,54 @@ void sendStatus(void)
     Serial.println(dataToSend);
     client.println(dataToSend);
     if (noResponseCounter < 20)
-        noResponseCounter++;
+      noResponseCounter++;
+  }
+}
+
+void ledStatusUpdate(void)
+{
+  static int counter = 0;
+  if (counter++ % 2)
+  {
+    if (outputState)
+    {
+      digitalWrite(15, 0x0);
+      digitalWrite(12, 0x0);
+      digitalWrite(13, 0x1);
+    }
+    else
+    {
+      if (dataExchangeOk && clientConnected)
+      {
+        digitalWrite(15, 0x0);
+        digitalWrite(12, 0x1);
+        digitalWrite(13, 0x0);
+      }
+      else
+      {
+        digitalWrite(15, 0x1);
+        digitalWrite(12, 0x0);
+        digitalWrite(13, 0x0);
+      }
+    }
+  }
+  else
+  {
+    digitalWrite(15, 0x0);
+    digitalWrite(12, 0x0);
+    digitalWrite(13, 0x0);
   }
 }
 
 void setup()
 {
-  pinMode(D0, 0x01);
+  pinMode(5, 0x01);
+  pinMode(15, 0x01);
+  pinMode(12, 0x01);
+  pinMode(13, 0x01);
+  digitalWrite(15, 0x0);
+  digitalWrite(12, 0x0);
+  digitalWrite(13, 0x0);
   // Initialising the UI will init the display too.
 
 
@@ -280,7 +327,7 @@ void setup()
     Serial.printf("Event wifi -----> %d\n", e);
 
   });*/
-# 344 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+# 391 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
   e1 = WiFi.onStationModeGotIP(onSTAGotIP); // As soon WiFi is connected, start NTP Client
   e2 = WiFi.onStationModeDisconnected(onSTADisconnected);
 
@@ -314,13 +361,14 @@ void setup()
 void loop()
 {
   static int i = 0;
-  static int last=0,sendTimer = 0,connectTimer = 0;
-  static int lastTime = 0;
+  static unsigned long last = 0, sendTimer = 0, connectTimer = 0;
+  static unsigned long lastTime = 0;
   ESP.wdtEnable(10000);
   ArduinoOTA.handle();
-# 403 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
-  if ((millis() - last) > 500)
+# 450 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+  if ((millis() - last) > 1000)
   {
+    ledStatusUpdate();
     //Serial.println(millis() - last);
     last = millis();
     /*  Serial.print(i); Serial.print(" ");
@@ -338,7 +386,7 @@ void loop()
     Serial.print(NTP.getUptimeString()); Serial.print(" since ");
 
    Serial.println(NTP.getTimeDateString(NTP.getFirstSync()).c_str());*/
-# 418 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
+# 466 "c:\\Users\\mirsmok\\work\\IoT\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA\\OutputModuleDS18B20OledOTA.ino"
     if (connectToServer())
     {
       clientConnected = true;
@@ -350,10 +398,10 @@ void loop()
     }
   }
   if (clientConnected && dataExchangeOk)
-    digitalWrite(D0, outputState);
+    digitalWrite(5, outputState);
   else
   {
-    digitalWrite(D0, 0x0);
+    digitalWrite(5, 0x0);
     outputState = false;
   }
   /** wylaczony pomiar temperatury*/
@@ -364,15 +412,14 @@ void loop()
     {
       DS18B20.requestTemperatures();
       actualTemperature = DS18B20.getTempCByIndex(0);
-    } while ((actualTemperature == 85.0 || actualTemperature == (-127.0)) && ((millis() - lastTime) < 3000));
+    } while ((actualTemperature == 85.0 || actualTemperature == (-127.0)) && ((millis() - lastTime) < 1000));
   }
-
 
   if ((millis() - sendTimer) > 10000)
   {
     sendTimer = millis();
-      sendStatus();
-     // digitalRead(OUTPUT_PIN) ? digitalWrite(OUTPUT_PIN,LOW) : digitalWrite(OUTPUT_PIN,HIGH);
+    sendStatus();
+    // digitalRead(OUTPUT_PIN) ? digitalWrite(OUTPUT_PIN,LOW) : digitalWrite(OUTPUT_PIN,HIGH);
   }
   delay(0);
   ESP.wdtFeed();
